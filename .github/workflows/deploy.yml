@@ -1,0 +1,36 @@
+name: Auto Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd /var/www/kotakubay-laravel
+            git pull origin main
+            
+            # Install package dependencies
+            composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
+            npm install
+            npm run prod
+            
+            # Refresh caches and migrations
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            # Fix permissions just in case
+            sudo chmod -R 775 storage bootstrap/cache
