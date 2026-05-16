@@ -109,6 +109,20 @@
                                 {{ $product->description }}
                             </p>
                         @endif
+                        
+                        <div class="product-card-rating" style="display:flex; align-items:center; gap:5px; margin-bottom:10px;">
+                            <div class="rating-stars" style="font-size: 0.85rem;">
+                                @php $avg = $product->averageRating(); @endphp
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= round($avg))
+                                        <span>⭐</span>
+                                    @else
+                                        <span style="filter: grayscale(1); opacity: 0.3;">⭐</span>
+                                    @endif
+                                @endfor
+                            </div>
+                            <span style="font-size: 0.75rem; color: #aaa;">({{ $product->reviewCount() }})</span>
+                        </div>
 
                         <div class="price-container" style="display:flex; flex-direction:column;">
                             @if($product->is_promo && $product->promo_price)

@@ -17,6 +17,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/', [ProductController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
@@ -65,6 +66,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Admin Settings
     Route::get('/admin/settings', [\App\Http\Controllers\AdminSettingController::class, 'index'])->name('admin.settings.index');
     Route::post('/admin/settings', [\App\Http\Controllers\AdminSettingController::class, 'update'])->name('admin.settings.update');
+
+    // Admin Review Moderation
+    Route::get('/admin/reviews', [ReviewController::class, 'index'])->name('admin.reviews.index');
+    Route::delete('/admin/reviews/{review}', [ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+    Route::patch('/admin/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('admin.reviews.approve');
 });
 
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
@@ -82,6 +88,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [\App\Http\Controllers\UserProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [\App\Http\Controllers\UserProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [\App\Http\Controllers\UserProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // Review Submission
+    Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
 require __DIR__ . '/auth.php';

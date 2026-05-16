@@ -35,6 +35,19 @@
                     </div>
                 @endif
                 <h1 class="product-title">{{ $product->name }}</h1>
+                <div class="product-rating-overview" style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    <div class="rating-stars">
+                        @php $avg = $product->averageRating(); @endphp
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= round($avg))
+                                <span>⭐</span>
+                            @else
+                                <span style="filter: grayscale(1); opacity: 0.3;">⭐</span>
+                            @endif
+                        @endfor
+                    </div>
+                    <span class="rating-count">({{ $product->reviewCount() }} Ulasan)</span>
+                </div>
                 @if($product->is_promo && $product->promo_price)
                     <div class="promo-badge">PROMO SPESIAL</div>
                     <div class="original-price">
@@ -98,6 +111,63 @@
                 </div>
             </div>
         @endif
+        {{-- Reviews Section --}}
+        <div class="reviews-section fade-in">
+            <h2 class="section-title">Ulasan Pelanggan</h2>
+            
+            @if($product->reviews->count() > 0)
+                <div class="reviews-list">
+                    @foreach($product->reviews as $review)
+                        <div class="review-item">
+                            <div class="review-header">
+                                <div class="review-user">{{ $review->user->name }}</div>
+                                <div class="review-stars">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <span style="{{ $i <= $review->rating ? '' : 'filter: grayscale(1); opacity: 0.3;' }}">⭐</span>
+                                    @endfor
+                                </div>
+                            </div>
+                            <div class="review-comment">
+                                {{ $review->comment }}
+                            </div>
+                            <div class="review-date" style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                                {{ $review->created_at->format('d M Y') }}
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p style="text-align: center; color: #888; padding: 20px;">Belum ada ulasan untuk produk ini.</p>
+            @endif
+
+            <div class="review-form-container">
+                <h3 style="margin-bottom: 20px;">Tulis Ulasan</h3>
+                @auth
+                    <form action="{{ route('reviews.store', $product->id) }}" method="POST">
+                        @csrf
+                        <div class="form-group">
+                            <label>Rating Anda</label>
+                            <div class="star-rating-input">
+                                <input type="radio" id="star5" name="rating" value="5" required /><label for="star5" title="5 stars">⭐</label>
+                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">⭐</label>
+                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">⭐</label>
+                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">⭐</label>
+                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">⭐</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Komentar (Opsional)</label>
+                            <textarea name="comment" id="comment" rows="4" class="form-control" placeholder="Bagikan pengalaman Anda menggunakan produk ini..."></textarea>
+                        </div>
+                        <button type="submit" class="btn">Kirim Ulasan</button>
+                    </form>
+                @else
+                    <p style="text-align: center; background: #f9f9f9; padding: 15px; border-radius: 10px;">
+                        Silakan <a href="{{ route('login') }}" style="color: var(--primary-color); font-weight: 700;">Login</a> untuk memberikan ulasan.
+                    </p>
+                @endauth
+            </div>
+        </div>
     </div>
     </div>
 
